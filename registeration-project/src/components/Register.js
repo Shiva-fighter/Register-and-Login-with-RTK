@@ -5,13 +5,43 @@ import { useDispatch, useSelector } from "react-redux";
 import { register } from "../slices/auth";
 import { clearMessage } from "../slices/message";
 
+const Register = () => {
+  const [successful, setSuccessful] = useState(false);
+  const { message } = useSelector((state) => state.message);
+
+  const initialValues = {
+    username: "",
+    email: "",
+    password: "",
+  };
+
+  const validationSchema = Yup.object().shape({
+    userName: Yup.string()
+      .test(
+        "len",
+        "The username must be between 3 and 20 characters.",
+        (val) =>
+          val && val.toString().length >= 3 && val.toString().length <= 20
+      )
+      .required("This is field required"),
+      password: Yup.string().test("len", "The password should be between 6 and 40 characters" , 
+      (val) =>
+        val && val.toString().length >= 6 && val.toString().length <= 30
+      ).required("This is required field"),
+
+      email: Yup.string().email("This is not a valid mail").required("This is required field")
+
+  });
 
 
-const Register = () =>{
-    const [successful, setSuccessful] = useState(false);
-    const {message } =useSelector(state => state.message);
-    return(
-        <div className="col-md-12 signup-form">
+  const handleRegister = (formValue) =>{
+    const {username ,email, password } = formValue;
+    setSuccessful(false);
+    dispatch(register({username , email, password})).unwrap().then(()=>setSuccessful(true)).catch(()=>setSuccessful(false))
+    
+  }
+  return (
+    <div className="col-md-12 signup-form">
       <div className="card card-container">
         <img
           src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
@@ -61,7 +91,9 @@ const Register = () =>{
                 </div>
 
                 <div className="form-group">
-                  <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
+                  <button type="submit" className="btn btn-primary btn-block">
+                    Sign Up
+                  </button>
                 </div>
               </div>
             )}
@@ -72,7 +104,9 @@ const Register = () =>{
       {message && (
         <div className="form-group">
           <div
-            className={successful ? "alert alert-success" : "alert alert-danger"}
+            className={
+              successful ? "alert alert-success" : "alert alert-danger"
+            }
             role="alert"
           >
             {message}
@@ -80,5 +114,5 @@ const Register = () =>{
         </div>
       )}
     </div>
-    )
-}
+  );
+};
